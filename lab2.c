@@ -21,20 +21,24 @@ int main(void) {
     }
 
     // Get the linefeed character
+    if (nread > 0 && line[nread - 1] == '\n') {
+      line[nread - 1] = '\0';
+    }
 
     // Fork a new process
-
     pid_t pid = fork();
 
     // Check if fork fails
     if (pid < 0) {
       perror("Fork failure");
+      // Check if the Exec fails
     } else if (pid == 0) {
       execlp(line, line, NULL);
       printf("Exec failure\n");
       free(line);
       exit(1);
     } else {
+      // If waitpid messes up (it equals -1)
       int status;
       if (waitpid(pid, &status, 0) == -1) {
         perror("Waitpid failure");
