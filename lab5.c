@@ -91,6 +91,12 @@ int main(void) {
   printf("The ID for Best-Fit algorithm is: %d\n", best_fit_id);
   printf("The ID for Worst-Fit algorithm is: %d\n", worst_fit_id);
 
+  free(free_block1);
+  free(free_block2);
+  free(free_block3);
+  free(free_block4);
+  free(free_block5);
+
   return 0;
 }
 
