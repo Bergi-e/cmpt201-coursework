@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,6 +7,7 @@
 
 int main(int argc, char *argv[]) {
   int pipefd[2];
+  int c2p[2];
   char buf;
   pid_t cpid;
 
@@ -20,6 +22,7 @@ int main(int argc, char *argv[]) {
   }
 
   cpid = fork();
+
   if (cpid == -1) {
     perror("fork");
     exit(EXIT_FAILURE);
@@ -27,19 +30,30 @@ int main(int argc, char *argv[]) {
 
   if (cpid == 0) {
     close(pipefd[1]);
+    close(c2p[0]);
 
     while (read(pipefd[0], &buf, 1) > 0) {
+      buf = toupper(buf);
       write(STDOUT_FILENO, &buf, 1);
     }
 
-    write(STDOUT_FILENO, "\n", 1);
+    close(c2p[1]);
     close(pipefd[0]);
     _exit(EXIT_SUCCESS);
 
   } else {
     close(pipefd[0]);
+    close(c2p[1]);
+
     write(pipefd[1], argv[1], strlen(argv[1]));
     close(pipefd[1]);
+
+    while (read(c2p[0], &buf, 1) > 0) {
+      write(STDOUT_FILENO, &buf, 1);
+    }
+    write(STDOUT_FILENO, "\n", 1);
+
+    close(c2p[0]);
     wait(NULL);
     exit(EXIT_SUCCESS);
   }
